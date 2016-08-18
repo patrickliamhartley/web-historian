@@ -2,11 +2,24 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="styles.css" />
+  <script src="jquery.min.js"></script>
 </head>
 <body>
   Enter a URL here:
-  <form method="POST">
+  <form id="input" method="POST">
     <input type="input" name="url"></input>
   </form>
+  <script>
+    $(function () {
+      $('#input').on('submit', function (e) {
+        e.preventDefault();
+        $.ajax({
+          url: 'http://127.0.0.1:8080/',
+          method: 'POST',
+          data: {'url': $('#input input').val()}
+        });
+      });
+    });
+  </script>
 </body>
 </html>

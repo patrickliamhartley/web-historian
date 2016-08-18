@@ -11,6 +11,25 @@ exports.headers = {
 };
 
 exports.serveAssets = function(res, asset, callback) {
+  if (asset.endsWith('.html') || asset.endsWith('.com')) {
+    exports.headers['Content-Type'] = 'text/html';
+  } else if (asset.endsWith('.css')) {
+    exports.headers['Content-Type'] = 'text/css';
+  } else if (asset.endsWith('.js')) {
+    exports.headers['Content-Type'] = 'text/javascript';
+  }
+  console.log(exports.headers['Content-Type']);
+  fs.readFile(asset, 'utf8', (err, data)=>{
+    if (err) {
+      res.writeHead(404, exports.headers);
+      res.end('Not Found');
+    } else {
+      res.writeHead(200, exports.headers);
+      res.write(data);
+      res.end();
+    } 
+  });
+
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...),
   // css, or anything that doesn't change often.)
