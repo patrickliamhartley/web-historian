@@ -25,17 +25,51 @@ exports.initialize = function(pathsObj) {
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function() {
+exports.readListOfUrls = function(cb) {
+  fs.readFile(exports.paths.list, 'utf8', function (err, content) {
+    if (err) {
+      throw err;
+    } else {
+      var urls = content.split('\n');
+      cb(urls);
+    }
+  });
 };
 
-exports.isUrlInList = function() {
+exports.isUrlInList = function(url, cb) {
+  exports.readListOfUrls(function (urls) {
+    cb(urls.indexOf(url) > -1);
+  });
 };
 
-exports.addUrlToList = function() {
+exports.addUrlToList = function(url, cb) {
+  cb = cb || function () {};
+  fs.appendFile(exports.paths.list, url, function (err) {
+    if (err) {
+      throw err;
+    } else {
+      cb();
+    }
+  });
 };
 
-exports.isUrlArchived = function() {
+exports.isUrlArchived = function(fileName, cb) {
+  !fs.exists(exports.paths.archivedSites + '/' + fileName, function (exists) {
+    cb(exists);
+  });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urlArray) {
+  urlArray.forEach(function(url) {
+    exports.isUrlInList(url, function(exists) {
+      if (exists === false) {
+        exports.addUrlToList(url);
+        fs.writeFile(exports.paths.archivedSites + '/' + url, '', function (err) {
+          if (err) {
+            throw err;
+          }
+        });
+      }
+    });
+  });
 };
