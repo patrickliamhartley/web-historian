@@ -9,6 +9,7 @@ var routes = {
   '/': archive.paths.siteAssets + '/index.html',
   '/styles.css': archive.paths.siteAssets + '/styles.css',
   '/jquery.min.js': archive.paths.siteAssets + '/jquery.min.js',
+  '/loading.html': archive.paths.siteAssets + '/loading.html'
 };
 
 var actions = {
@@ -16,21 +17,31 @@ var actions = {
     var route = routes[req.url];
     if (route) {
       helpers.serveAssets(res, route); 
-    } else if (req.url.startsWith('/www.')) {
-      if (fs.existsSync(archive.paths.archivedSites + req.url)) {
-        helpers.serveAssets(res, archive.paths.archivedSites + req.url);
-      }
+    } else if (fs.existsSync(archive.paths.archivedSites + req.url + '.html')) {
+      console.log('page was found!');
+      helpers.serveAssets(res, archive.paths.archivedSites + req.url + '.html');
     } else {
       res.writeHead(404, exports.headers);
       res.end('Not Found');
     }
   },
   'POST': function (req, res) {
-    res.writeHead(302, exports.headers);
+    req.setEncoding('utf8');
     req.on('data', (json) => {
-      fs.appendFile(archive.paths.list, json.slice(4) + '\n', (err)=>{
-        if (err) { throw err; } 
-        res.end();
+      var url = json.slice(4);
+      archive.isUrlArchived(url + '.html', function (exists) {
+        if (exists) {
+          res.writeHead(302, {Location: '/' + url});
+          res.end();
+        } else {
+          archive.isUrlInList(url, function (exists) {
+            if (!exists) {
+              archive.addUrlToList(url);
+            }
+          });
+          res.writeHead(302, {Location: '/loading.html'});
+          res.end();
+        }
       });
     });
   }
@@ -45,5 +56,4 @@ exports.handleRequest = function (req, res) {
     res.writeHead(405, exports.headers);
     res.end('Method Not Allowed');
   }
-  // res.end(archive.paths.siteAssets + '/index.html');
 };

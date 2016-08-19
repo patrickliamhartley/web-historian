@@ -18,15 +18,18 @@ exports.serveAssets = function(res, asset, callback) {
   } else if (asset.endsWith('.js')) {
     exports.headers['Content-Type'] = 'text/javascript';
   }
-  console.log(exports.headers['Content-Type']);
-  fs.readFile(asset, 'utf8', (err, data)=>{
+  console.log(asset);
+  fs.readFile(asset, 'utf8', function (err, data) {
     if (err) {
       res.writeHead(404, exports.headers);
       res.end('Not Found');
     } else {
+      delete exports.headers['Location'];
+      exports.headers['Content-Type'] = 'text/html';
       res.writeHead(200, exports.headers);
-      res.write(data);
-      res.end();
+      console.log(exports.headers);
+      // res.write(data);
+      res.end(data);
     } 
   });
 

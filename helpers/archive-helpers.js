@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var request = require('request');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -44,7 +45,7 @@ exports.isUrlInList = function(url, cb) {
 
 exports.addUrlToList = function(url, cb) {
   cb = cb || function () {};
-  fs.appendFile(exports.paths.list, url, function (err) {
+  fs.appendFile(exports.paths.list, url + '\n', function (err) {
     if (err) {
       throw err;
     } else {
@@ -54,21 +55,17 @@ exports.addUrlToList = function(url, cb) {
 };
 
 exports.isUrlArchived = function(fileName, cb) {
-  !fs.exists(exports.paths.archivedSites + '/' + fileName, function (exists) {
-    cb(exists);
-  });
+  // passes a boolean to the callback function
+  // indicating if the file exists
+  fs.exists(exports.paths.archivedSites + '/' + fileName, cb);
 };
 
 exports.downloadUrls = function(urlArray) {
   urlArray.forEach(function(url) {
-    exports.isUrlInList(url, function(exists) {
+    exports.isUrlArchived(url, function(exists) {
       if (exists === false) {
-        exports.addUrlToList(url);
-        fs.writeFile(exports.paths.archivedSites + '/' + url, '', function (err) {
-          if (err) {
-            throw err;
-          }
-        });
+        request('http://' + url).pipe(fs.createWriteStream(exports.paths.archivedSites + '/' + url + '.html'))
+            .on('error', function (err) { console.log(err); });
       }
     });
   });

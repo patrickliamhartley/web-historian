@@ -11,14 +11,14 @@
   </form>
   <script>
     $(function () {
-      $('#input').on('submit', function (e) {
-        e.preventDefault();
-        $.ajax({
-          url: 'http://127.0.0.1:8080/',
-          method: 'POST',
-          data: {'url': $('#input input').val()}
-        });
-      });
+      // $('#input').on('submit', function (e) {
+        // e.preventDefault();
+      //   $.ajax({
+      //     url: 'http://127.0.0.1:8080/',
+      //     method: 'POST',
+      //     data: JSON.stringify({'url': $('#input input').val()})
+      //   });
+      // });
     });
   </script>
 </body>
